@@ -1,0 +1,82 @@
+
+License Information
+-------------------
+
+The hardware is released under [Creative Commons Share-alike 3.0](http://creativecommons.org/licenses/by-sa/3.0/).
+
+->Additional Licenses and attributions to original authors as needed.<-
+
+
+ This #include statement was automatically added by the Spark IDE.
+ #include "HttpClient/HttpClient.h"
+ #define RED_SWITCH "45817cb7625427d271e7fec"
+ #define BLUE_SWITCH "55817ef7625427bafc83c6c"
+ #define GREEN_SWITCH "55818047625427dbc2e698f"
+ #define TOKEN "pSfasJt9W7v5W3fpUsRYNKiDMgJ770NK"
+ HttpClient http;
+ http_header_t headers[] = {
+     { "Content-Type", "application/json" },
+     { "X-Auth-Token" , TOKEN },
+     { NULL, NULL } // NOTE: Always terminate headers with NULL
+ };
+
+ String search_on = String("\"value\": 1");//To check if a switch is pressed or not
+
+ http_request_t request;
+ http_response_t response;
+
+ int red_on;
+ int blue_on;
+ int green_on;
+
+ void setup() {
+ pinMode(A0, OUTPUT);
+ pinMode(A1, OUTPUT);
+ pinMode(A2, OUTPUT);
+ request.hostname = "things.ubidots.com";
+ request.port = 80;
+// Serial.begin(9600); For debug
+ }
+
+ void loop() {
+ //Better doing a function for this code, but I guess is easier to understand in this way
+ response.body = "";
+ response.status = 0;
+ request.path = "/api/v1.6/variables/"RED_SWITCH"/values?page_size=1";//
+ http.get(request, response, headers);
+ red_on = response.body.indexOf(search_on);//Search for value 1.0
+// Serial.print("INDEX: ");
+ //Serial.println(red_on);
+
+ if (red_on == -1) {//red_on default value is -1
+     analogWrite(A0,0); //turn off
+ }
+ else if (-1 < red_on) {
+     analogWrite(A0,400);//turn on
+ }
+
+ response.body = "";
+ response.status = 0;
+ request.path = "/api/v1.6/variables/"BLUE_SWITCH"/values?page_size=1";// Get request for the blue led switch
+ http.get(request, response, headers);
+ blue_on = response.body.indexOf(search_on);
+ if (blue_on == -1) {
+     analogWrite(A1,0);
+ }
+ else if (-1 < blue_on) {
+     analogWrite(A1,400);
+ }
+
+ response.body = "";
+ response.status = 0;
+ request.path = "/api/v1.6/variables/"GREEN_SWITCH"/values?page_size=1";// Get request for the blue led switch
+ http.get(request, response, headers);
+ green_on = response.body.indexOf(search_on);
+ if (green_on == -1) {
+     analogWrite(A2,0);
+ }
+ else if (-1 < green_on) {
+     analogWrite(A2,400);
+ }
+
+ }
